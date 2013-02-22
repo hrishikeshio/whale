@@ -1,1 +1,8 @@
+Whale
+
 lol
+
+Directories:
+
+    * Raw
+
