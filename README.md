@@ -9,11 +9,24 @@ Directory Structure
 
 This repository contains the following directories:
 
-* Raw - raw data as received from kaggle.
+* raw - raw data as received from kaggle.
+* processed - Processed data files
 * Subset - small subset of the raw data to debug the algorithms.
 * FFT - Code for Fast Fourier Transform to convert the data from
   the time to the frequency domain.
-* Tools - common tools.
+* tools - common tools.
+* models - All learning models go here
+* sample - sample data files by kaggle. Out here for quick testing
+
+Note to Frans:
+Use file naming in order of running them so it is easier for others to follow
+eg. 00_preprocess.py
+01_pca.py
+02_rf.py
+03_postprocessing.py
+Also I would prefer to use small caps for file and folder names
+
+
 
 Plan
 ====
@@ -41,4 +54,14 @@ We need to convert the resulting files in csv files. Might need to do pca / othe
 
 Step 3 : Learning
 ------------------
-Aplly learning algorithms
+Apply learning algorithms
+
+Note: We could use this file as a blog entry. 
+
+Preprocessing
+--------------
+
+hrishi :
+I am going to create a python script to separate out files which are negative (no whale upcall). Concatenate them using audacity
+ and use it to train a noise reduction algorithm in audacity or elsewhere. Then use this profile on positive train files and see result.
+

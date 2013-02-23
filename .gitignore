@@ -1,2 +1,4 @@
 backup/
 raw/
+processed/positives/
+processed/negatives/
