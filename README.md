@@ -26,8 +26,9 @@ Step 1 : Preprocessing
 I like learning algorithms. Thats I want to make their job easier.
 I am going to spend time googling around and trying different tools/libraries to 
 
-* Remove the noise
+* Remove the noise with noise-removal
 * Remove frequencies which do not correspong to up-call
+* Removing click noises with click-removal
 
 I will also be playing with audacity, which I highly recommend since it has a GUI, to play around with different settings 
 of noise reduction, high-pass and low-pass filter.
