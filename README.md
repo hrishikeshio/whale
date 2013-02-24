@@ -24,8 +24,19 @@ eg. 00_preprocess.py
 01_pca.py
 02_rf.py
 03_postprocessing.py
-Also I would prefer to use small caps for file and folder names
+(Frans: if you make this 010_...  020_..  ect
+it makes it easier to insert a step later on. 
+(BASIC use to have linenumbers, learned it there the hard way).
 
+Also: the best way to make something reproducable is with a
+shell script or even better a makefile.  The latter
+allows non linear flows. i.e. tree like flow.).
+
+Also I would prefer to use small caps for file and folder names
+(Frans:  Sure. It's your repo.
+I use the convention: directories start with a capital.
+Filenames are always lowercase.  I find this makes it easier
+to spot the directories in a terminal window.)
 
 
 Plan
