@@ -11,7 +11,7 @@ number_of_samples = 4000
 
 
 def read_single( filename ) :
-    f = aifc.open( 'train19050.aiff' )
+    f = aifc.open( '../Raw/data/train/' + filename )
     n = f.getnframes()
     assert n == number_of_samples
     signal = scipy.zeros( n )
@@ -71,10 +71,9 @@ def example() :
 signal = read_samples( 'train', 19050 )
 t      = scipy.linspace(0,6,3*number_of_samples)
 
-spectrum = scipy.zeros( (100, number_of_samples ) ) # number_of_samples) )
+spectrum = scipy.zeros( (200, number_of_samples ) ) # number_of_samples) )
 for i in range(0, number_of_samples ) :
-    print (i,i+number_of_samples) 
-    sub_signal = signal[i:i+ 100] # number_of_samples]
+    sub_signal = signal[(number_of_samples+i):(number_of_samples+i+200)] # number_of_samples]
     spectrum[:,i]= abs(scipy.fft(sub_signal))
 
 pylab.pcolor(spectrum)
