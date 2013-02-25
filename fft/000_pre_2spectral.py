@@ -17,22 +17,20 @@ def read_single( filename ) :
     signal = scipy.zeros( n )
     # TODO this is the slow way of doing it.
     for i in range(0,n) :
-        # Big indian '>'
+        # Samples are stored Big indian '>'
         signal[ i ] = struct.unpack(">h", f.readframes( 1 ) )[0]
 
     return signal
 
 
 def read_samples( kind, n ):
-    filename_pre  = '%s%d.aiff' % ( kind, n-1 )
     filename_cur  = '%s%d.aiff' % ( kind, n )
     filename_post = '%s%d.aiff' % ( kind, n+1 )
 
-    s1 = read_single( filename_pre )
     s2 = read_single( filename_cur )
     s3 = read_single( filename_post )
 
-    signal = numpy.concatenate( (s1, s2, s3) )
+    signal = numpy.concatenate( (s2, s3) )
     return signal
 
 
@@ -69,15 +67,19 @@ def example() :
 
 
 signal = read_samples( 'train', 19050 )
-t      = scipy.linspace(0,6,3*number_of_samples)
+t      = scipy.linspace(0,4,2*number_of_samples)
 
 spectrum = scipy.zeros( (200, number_of_samples ) ) # number_of_samples) )
 for i in range(0, number_of_samples ) :
-    sub_signal = signal[(number_of_samples+i):(number_of_samples+i+200)] # number_of_samples]
+    sub_signal = signal[i:(i+200)] # number_of_samples]
     spectrum[:,i]= abs(scipy.fft(sub_signal))
 
-pylab.pcolor(spectrum)
-pylab.colorbar()
-pylab.show()
+
+print "Plotting"
+
+# This is _REALLY_ slow
+if True :
+    pylab.imshow(spectrum, aspect="auto")
+    pylab.show()
 
 
