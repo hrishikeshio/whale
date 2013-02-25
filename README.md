@@ -24,6 +24,7 @@ eg. 00_preprocess.py
 01_pca.py
 02_rf.py
 03_postprocessing.py
+
 (Frans: if you make this 010_...  020_..  ect
 it makes it easier to insert a step later on. 
 (BASIC use to have linenumbers, learned it there the hard way).
@@ -75,4 +76,44 @@ Preprocessing
 hrishi :
 I am going to create a python script to separate out files which are negative (no whale upcall). Concatenate them using audacity
  and use it to train a noise reduction algorithm in audacity or elsewhere. Then use this profile on positive train files and see result.
+
+
+
+
+Plan Frans
+==========
+
+
+Step 1: Spectograms
+-------------------
+
+Compute spectograms
+
+Results in a 4000x100 matrix for each sample.
+(4000 times steps 100 frequency intencities).
+
+Step 2: Line Up
+---------------
+
+Line up the postive training samples.
+A whale call might end at the begin or end of a sample.
+This makes it more difficult to train a learning algorithm on it.
+So in this step the calls will be processed (possible by hand) to have the
+call end at the end of the sample.
+
+Step 3: Train
+-------------
+
+Train a RF on the training samples.
+It will be trained on a small window of the sample containing the whale call.
+
+Step 4: Predicting:
+-------------------
+
+For each test sample, slide a window over it.
+For each position run the RF.  If for one of the positions the RF predicts a
+whale call the prediction for the whole sample is 'Whale call'.
+
+
+
 
