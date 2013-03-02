@@ -1,23 +1,26 @@
+# vi: spell spl=en
+import sys
 import scipy
 import numpy         # For array manipulation
 import scipy.fftpack # For Fast Fourier Transform
 import aifc          # For reading AIFF files
 import struct        # For converting binary data inside the AIFF files.
-import pylab         # To make plots.
-import csv           # To read csv files.
-import re            # 
-import sklearn
+#import pylab         # To make plots.
+#import csv           # To read csv files.
+#import re            # 
+#import sklearn
 
-# Each example is 2 seconds long with  2000 samples per second.
+# Each clip is 2 seconds long with  2000 samples per second.
 number_of_samples = 4000
 
-
-def read_single( filename ) :
+def read_single_clip( filename ) :
+    """Read a sinle aiff file"""
     f = aifc.open( '../Raw/data/' + filename )
     n = f.getnframes()
     assert n == number_of_samples
     signal = scipy.zeros( n )
     # TODO this is the slow way of doing it.
+    # Unpacking an entire byte string might be faster.
     for i in range(0,n) :
         # Samples are stored Big indian '>'
         signal[ i ] = struct.unpack(">h", f.readframes( 1 ) )[0]
@@ -25,51 +28,27 @@ def read_single( filename ) :
     return signal
 
 
-def read_samples( kind, n ):
+def read_two_clips( kind, n, last ):
+    """Read two consecutive clips."""
     filename_cur  = '%s/%s%d.aiff' % ( kind, kind, n )
     filename_post = '%s/%s%d.aiff' % ( kind, kind, n+1 )
 
-    s2 = read_single( filename_cur )
-    s3 = read_single( filename_post )
+    s2 = read_single_clip( filename_cur )
+    if ( last ) :
+        s3 = read_single_clip( filename_cur )
+    else :
+        s3 = read_single_clip( filename_post )
 
     signal = numpy.concatenate( (s2, s3) )
     return signal
 
 
-def example() :
-    f = aifc.open( 'train19050.aiff' )
-
-    print f.getnchannels()
-    print f.getsampwidth()
-    n = f.getnframes()
-
-    # Time ranges is from 0 to 2 seconds.
-    t      = scipy.linspace(0,2,n)
-    signal = scipy.zeros( n )
-
-    # Compute the range of frequences
-    freqs = scipy.fftpack.fftfreq(signal.size, t[1]-t[0])
-
-    # TODO this is the slow way of doing it.
-    for i in range(0,n) :
-        # Big indian '>'
-        signal[ i ] = struct.unpack(">h", f.readframes( 1 ) )[0]
-
-    FFT = abs(scipy.fft(signal))
-
-    # Make a time and frequence plot
-    pylab.subplot(211)
-    pylab.plot(t,signal)
-    pylab.subplot(212)
-    pylab.plot(freqs,20*scipy.log10(FFT),'x')
-    pylab.show()
-
-# Compute the spectrum of a training example.
+# Compute the spectrum of a clip
 # This is done by repeatedly computing a fft with a short
 # window, while sliding the window of the whole example.
 #
-def get_spectrum( ex_id, kind ):
-    signal   = read_samples( kind, ex_id )
+def get_spectrum( clip_id, kind, last ):
+    signal   = read_two_clips( kind, clip_id, last )
     t        = scipy.linspace(0,4,2*number_of_samples)
     spectrum = scipy.zeros( (400, number_of_samples/100 ) ) 
     n = 0
@@ -79,39 +58,14 @@ def get_spectrum( ex_id, kind ):
         n = n + 1
     return spectrum
 
+def reduce( clip_id, kind, last=False ) :
+    """Reduce the information in from a clip to a single row of numbers
+    that can be fed to a learning algorithm
+    """
 
-def spectogram( ex_id ) :
-    spectrum = get_spectrum( ex_id )
-    print "Plotting"
-
-    spectrum = spectrum[20:50,0:number_of_samples:10]
-    pylab.imshow(spectrum, aspect="auto")
-    pylab.show()
-
-
-def slide_show() :
-    with open( '../Raw/data/train.csv', 'r' ) as truefalsefile:
-        trainreader = csv.reader( truefalsefile, delimiter=',' )
-        trainreader.next() # Skip header
-        for row in trainreader:
-            print row[0], row[1]
-            filename = row[0]
-            score    = row[1]
-            print filename
-            match = re.match( r"train(\d+).aiff", filename )
-            if match is None :
-                exit(0)
-            else :
-                ex_id = match.group(1)
-                if score == '1' :
-                    spectogram( int( ex_id ) )
-
-
-def reduce( ex_id, kind ) :
-
-    spectrum = get_spectrum( ex_id, kind )
+    # Compute the spectrum of the clip
+    spectrum = get_spectrum( clip_id, kind, last )
     # Use only part of the spectrum (Filter hight and low frequences)
-    # and take a sample every 0.1 second
     spectrum = spectrum[20:50,0:number_of_samples]
     # Compute a wheighted average for each sample.
 
@@ -119,7 +73,6 @@ def reduce( ex_id, kind ) :
         tot_sum = numpy.sum( x )
         i = 0.0
         w_avg = 0.0
-        n = 0
         for el in x :
             w_avg =  w_avg + el/tot_sum*i
             i = i + 1
@@ -128,29 +81,18 @@ def reduce( ex_id, kind ) :
     print
 
 
-def reduce_training_set():
-    n = 0
-    with open( '../Raw/data/train.csv', 'r' ) as truefalsefile:
-        trainreader = csv.reader( truefalsefile, delimiter=',' )
-        trainreader.next() # Skip header
-        for row in trainreader:
-            filename = row[0]
-            score    = row[1]
-            match = re.match( r"train(\d+).aiff", filename )
-            if match is None :
-                exit(0)
-            else :
-                ex_id = match.group(1)
-                reduce( int( ex_id ), 'train' )
-            n = n + 1
-#            if n == 300 :
-#                break
+def reduce_set( kind, count ):
+    """Reduce a set of clips"""
+    for clip_id in xrange(1,count) :
+        reduce( clip_id, kind )
+    reduce( count, kind, last=True )
 
-def reduce_test_set():
-    for ex_id in xrange(1,54504) :
-    # for ex_id in xrange(1,5) :
-        reduce( int( ex_id ), 'test' )
-
-# reduce_training_set()
-reduce_test_set()
+if len( sys.argv ) == 2 :
+    kind = sys.argv[1]
+    if  kind == 'test' :
+        reduce_set( 'test', 54503 )
+    elif kind == 'train' :
+        reduce_set( 'train', 30000 )
+    else:
+        exit(1)
 

@@ -2,14 +2,14 @@
 
 library(randomForest)
 library(ROCR)
-train <- read.table("total.csv", sep=" ", header=FALSE)
-test  <- read.table("test.csv", sep=" ", header=FALSE)
+train <- read.table("reduced_train.csv", sep=" ", header=FALSE)
+test  <- read.table("reduced_test.csv",  sep=" ", header=FALSE)
 n     <- nrow( train )
 clip_labels <- read.csv("../Raw/data/train.csv")
 labels <- factor( clip_labels$label )
 train_labels  <- labels[1:n]
 
-rf <- randomForest(train, train_labels, xtest=test, ntree=100,do.trace=TRUE)
+rf <- randomForest( train, train_labels, xtest=test, ntree=300, do.trace=TRUE )
 
 predictions <- as.integer( levels(train_labels)[rf$test$predicted] )
 
